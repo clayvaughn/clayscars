@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Clay'sCars.com - Madison, IN</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; color: #000; transition: background 0.3s, color 0.3s; }
+    body.dark { background: #121212; color: #eee; }
     header { background: #0074D9; color: white; padding: 1rem; text-align: center; }
     .container { padding: 2rem; max-width: 900px; margin: auto; }
     .search-box { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
     label { font-weight: bold; }
-    select, button { padding: 0.5rem; font-size: 1rem; }
+    input, select, button { padding: 0.5rem; font-size: 1rem; }
     button { background: #0074D9; color: white; border: none; cursor: pointer; }
     button:hover { background: #005fa3; }
-    .car-result { background: white; padding: 1rem; margin-bottom: 1rem; border-left: 4px solid #0074D9; display: flex; align-items: center; gap: 1rem; }
+    .car-result { background: white; color: black; padding: 1rem; margin-bottom: 1rem; border-left: 4px solid #0074D9; display: flex; align-items: center; gap: 1rem; }
+    .dark .car-result { background: #222; color: #eee; }
     .car-result img { width: 100px; height: auto; border: 1px solid #ccc; }
     .car-details h3 { margin: 0 0 0.5rem 0; font-size: 1.2rem; }
     .car-details a { text-decoration: none; color: #0074D9; }
@@ -34,104 +36,191 @@
       <select id="model"></select>
       <label for="year">Year:</label>
       <select id="year"></select>
+      <label for="minPrice">Min $:</label>
+      <input type="number" id="minPrice" />
+      <label for="maxPrice">Max $:</label>
+      <input type="number" id="maxPrice" />
       <label for="sort">Sort:</label>
       <select id="sort">
         <option value="">Default</option>
-        <option value="priceAsc">Price: Low → High</option>
-        <option value="priceDesc">Price: High → Low</option>
-        <option value="yearDesc">Newest</option>
+        <option value="priceAsc">Price ↑</option>
+        <option value="priceDesc">Price ↓</option>
         <option value="yearAsc">Oldest</option>
+        <option value="yearDesc">Newest</option>
       </select>
       <button onclick="searchCars()">Search</button>
       <button onclick="resetFilters()">Clear</button>
-      <button onclick="toggleView()">Toggle View</button>
+      <button onclick="toggleView()">View</button>
+      <button onclick="toggleDark()">🌙</button>
     </div>
     <div id="results"></div>
   </div>
 
   <script>
-    let carInventory = [];
+    const carInventory = [
+  {
+    "make": "Ford",
+    "model": "F-150",
+    "year": "2019",
+    "price": "$29,995",
+    "dealer": "Madison Ford - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.madisonfordin.com/used-vehicles/ford-f150-2019"
+  },
+  {
+    "make": "Ford",
+    "model": "Escape",
+    "year": "2020",
+    "price": "$23,000",
+    "dealer": "Madison Ford - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.madisonfordin.com/used-vehicles/ford-escape-2020"
+  },
+  {
+    "make": "Toyota",
+    "model": "Camry",
+    "year": "2018",
+    "price": "$18,500",
+    "dealer": "Toyota of Madison - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.toyotaofmadison.net/used-cars-madison-indiana.html#camry"
+  },
+  {
+    "make": "Toyota",
+    "model": "RAV4",
+    "year": "2021",
+    "price": "$27,300",
+    "dealer": "Toyota of Madison - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.toyotaofmadison.net/used-cars-madison-indiana.html#rav4"
+  },
+  {
+    "make": "Jeep",
+    "model": "Grand Cherokee",
+    "year": "2020",
+    "price": "$32,000",
+    "dealer": "Madison CDJR - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.madisoncdjr.com/used-vehicles/#jeep-grand-cherokee"
+  },
+  {
+    "make": "Ram",
+    "model": "1500",
+    "year": "2019",
+    "price": "$28,500",
+    "dealer": "Madison CDJR - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.madisoncdjr.com/used-vehicles/#ram-1500"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Equinox",
+    "year": "2017",
+    "price": "$15,900",
+    "dealer": "Chandler Select - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.chandlerselect.com/newandusedcars#equinox"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Tucson",
+    "year": "2022",
+    "price": "$24,800",
+    "dealer": "Chandler Select - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.chandlerselect.com/newandusedcars#tucson"
+  }
+];
     let lastFilteredCars = [];
     let isGridView = false;
 
-    fetch("cars.json")
-      .then(res => res.json())
-      .then(data => {
-        carInventory = data;
-        populateDropdowns(carInventory);
-        loadFilters();
-        searchCars();
-      });
+    window.onload = () => {
+      populateDropdowns(carInventory);
+      loadFilters();
+      applyURLFilters();
+      searchCars();
+      applyDark();
+    };
 
     function populateDropdowns(data) {
-      const makeSelect = document.getElementById("make");
-      const modelSelect = document.getElementById("model");
-      const yearSelect = document.getElementById("year");
+      const makeSel = document.getElementById("make");
+      const modelSel = document.getElementById("model");
+      const yearSel = document.getElementById("year");
 
-      const makes = [...new Set(data.map(car => car.make))];
-      makeSelect.innerHTML = '<option value="">All Makes</option>' + makes.map(make => `<option value="\${make}">\${make}</option>`).join("");
+      const makes = [...new Set(data.map(c => c.make))];
+      makeSel.innerHTML = '<option value="">All</option>' + makes.map(m => `<option value="${m}">${m}</option>`).join("");
 
-      makeSelect.onchange = () => {
-        const selectedMake = makeSelect.value;
-        const filteredModels = data.filter(car => car.make === selectedMake || !selectedMake);
-        const models = [...new Set(filteredModels.map(car => car.model))];
-        modelSelect.innerHTML = '<option value="">All Models</option>' + models.map(model => `<option value="\${model}">\${model}</option>`).join("");
-        modelSelect.dispatchEvent(new Event('change'));
+      makeSel.onchange = () => {
+        const selectedMake = makeSel.value;
+        const models = [...new Set(data.filter(c => !selectedMake || c.make === selectedMake).map(c => c.model))];
+        modelSel.innerHTML = '<option value="">All</option>' + models.map(m => `<option value="${m}">${m}</option>`).join("");
+        modelSel.dispatchEvent(new Event('change'));
       };
 
-      modelSelect.onchange = () => {
-        const selectedMake = makeSelect.value;
-        const selectedModel = modelSelect.value;
-        const filteredYears = data.filter(car =>
-          (!selectedMake || car.make === selectedMake) &&
-          (!selectedModel || car.model === selectedModel)
-        );
-        const years = [...new Set(filteredYears.map(car => car.year))].sort((a, b) => b - a);
-        yearSelect.innerHTML = '<option value="">All Years</option>' + years.map(year => `<option value="\${year}">\${year}</option>`).join("");
+      modelSel.onchange = () => {
+        const selectedMake = makeSel.value;
+        const selectedModel = modelSel.value;
+        const years = [...new Set(data.filter(c => (!selectedMake || c.make === selectedMake) && (!selectedModel || c.model === selectedModel)).map(c => c.year))];
+        yearSel.innerHTML = '<option value="">All</option>' + years.sort((a,b)=>b-a).map(y => `<option value="${y}">${y}</option>`).join("");
       };
 
-      makeSelect.dispatchEvent(new Event('change'));
+      makeSel.dispatchEvent(new Event('change'));
     }
 
     function searchCars() {
       const make = document.getElementById("make").value.toLowerCase();
       const model = document.getElementById("model").value.toLowerCase();
       const year = document.getElementById("year").value;
+      const min = parseInt(document.getElementById("minPrice").value) || 0;
+      const max = parseInt(document.getElementById("maxPrice").value) || Infinity;
       const sort = document.getElementById("sort").value;
 
-      saveFilters();
-
-      let filtered = carInventory.filter(car =>
-        (make === "" || car.make.toLowerCase() === make) &&
-        (model === "" || car.model.toLowerCase() === model) &&
-        (year === "" || car.year === year)
-      );
+      let filtered = carInventory.filter(c => {
+        const price = parseInt(c.price.replace(/[^0-9]/g, ''));
+        return (!make || c.make.toLowerCase() === make) &&
+               (!model || c.model.toLowerCase() === model) &&
+               (!year || c.year === year) &&
+               price >= min && price <= max;
+      });
 
       filtered = sortCars(filtered, sort);
       displayCars(filtered);
+      saveFilters();
+      updateURL();
     }
 
-    function sortCars(cars, criteria) {
-      switch (criteria) {
-        case "priceAsc":
-          return cars.sort((a, b) => parseInt(a.price.replace(/[^0-9]/g, '')) - parseInt(b.price.replace(/[^0-9]/g, '')));
-        case "priceDesc":
-          return cars.sort((a, b) => parseInt(b.price.replace(/[^0-9]/g, '')) - parseInt(a.price.replace(/[^0-9]/g, '')));
-        case "yearAsc":
-          return cars.sort((a, b) => a.year - b.year);
-        case "yearDesc":
-          return cars.sort((a, b) => b.year - a.year);
-        default:
-          return cars;
+    function sortCars(cars, sort) {
+      switch (sort) {
+        case "priceAsc": return cars.sort((a,b)=>parseInt(a.price.replace(/[^0-9]/g,'')) - parseInt(b.price.replace(/[^0-9]/g,'')));
+        case "priceDesc": return cars.sort((a,b)=>parseInt(b.price.replace(/[^0-9]/g,'')) - parseInt(a.price.replace(/[^0-9]/g,'')));
+        case "yearAsc": return cars.sort((a,b)=>a.year - b.year);
+        case "yearDesc": return cars.sort((a,b)=>b.year - a.year);
+        default: return cars;
       }
     }
 
-    function resetFilters() {
-      document.getElementById("make").value = "";
-      document.getElementById("model").value = "";
-      document.getElementById("year").value = "";
-      document.getElementById("sort").value = "";
-      searchCars();
+    function displayCars(cars) {
+      const div = document.getElementById("results");
+      div.className = isGridView ? "grid" : "list";
+      div.innerHTML = "";
+      lastFilteredCars = cars;
+
+      if (!cars.length) return div.innerHTML = "<p>No cars found.</p>";
+
+      const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+
+      cars.forEach(c => {
+        const isFav = favs.includes(c.link);
+        div.innerHTML += `
+          <div class="car-result">
+            <img src="${c.image}" />
+            <div class="car-details">
+              <h3><a href="${c.link}" target="_blank">${c.year} ${c.make} ${c.model}</a></h3>
+              <p>${c.price} — ${c.dealer}</p>
+              <button onclick="toggleFavorite('${c.link}')">${isFav ? '💔 Unsave' : '❤️ Save'}</button>
+            </div>
+          </div>`;
+      });
     }
 
     function toggleView() {
@@ -139,48 +228,63 @@
       displayCars(lastFilteredCars);
     }
 
-    function displayCars(cars) {
-      lastFilteredCars = cars;
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.className = isGridView ? "grid" : "list";
-      resultsDiv.innerHTML = "";
+    function resetFilters() {
+      ["make", "model", "year", "minPrice", "maxPrice", "sort"].forEach(id => document.getElementById(id).value = "");
+      searchCars();
+    }
 
-      if (cars.length === 0) {
-        resultsDiv.innerHTML = "<p>No cars found matching your criteria in Madison, IN.</p>";
-        return;
+    function toggleFavorite(link) {
+      let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+      if (favs.includes(link)) favs = favs.filter(l => l !== link);
+      else favs.push(link);
+      localStorage.setItem("favorites", JSON.stringify(favs));
+      displayCars(lastFilteredCars);
+    }
+
+    function toggleDark() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("dark", document.body.classList.contains("dark") ? "1" : "0");
+    }
+
+    function applyDark() {
+      if (localStorage.getItem("dark") === "1") {
+        document.body.classList.add("dark");
       }
-
-      cars.forEach(car => {
-        const div = document.createElement("div");
-        div.className = "car-result";
-        div.innerHTML = \`
-          <img src="\${car.image}" alt="\${car.make} \${car.model}" />
-          <div class="car-details">
-            <h3><a href="\${car.link}" target="_blank">\${car.year} \${car.make} \${car.model}</a></h3>
-            <p>\${car.price} — \${car.dealer}</p>
-          </div>
-        \`;
-        resultsDiv.appendChild(div);
-      });
     }
 
     function saveFilters() {
-      localStorage.setItem("filters", JSON.stringify({
+      const filters = {
         make: document.getElementById("make").value,
         model: document.getElementById("model").value,
         year: document.getElementById("year").value,
+        minPrice: document.getElementById("minPrice").value,
+        maxPrice: document.getElementById("maxPrice").value,
         sort: document.getElementById("sort").value
-      }));
+      };
+      localStorage.setItem("filters", JSON.stringify(filters));
     }
 
     function loadFilters() {
-      const filters = JSON.parse(localStorage.getItem("filters"));
-      if (filters) {
-        document.getElementById("make").value = filters.make;
-        document.getElementById("model").value = filters.model;
-        document.getElementById("year").value = filters.year;
-        document.getElementById("sort").value = filters.sort;
+      const f = JSON.parse(localStorage.getItem("filters") || "{}");
+      for (const key in f) {
+        if (document.getElementById(key)) document.getElementById(key).value = f[key];
       }
+    }
+
+    function updateURL() {
+      const params = new URLSearchParams();
+      ["make", "model", "year", "minPrice", "maxPrice", "sort"].forEach(id => {
+        const val = document.getElementById(id).value;
+        if (val) params.set(id, val);
+      });
+      history.replaceState(null, "", "?" + params.toString());
+    }
+
+    function applyURLFilters() {
+      const params = new URLSearchParams(window.location.search);
+      ["make", "model", "year", "minPrice", "maxPrice", "sort"].forEach(id => {
+        if (params.has(id)) document.getElementById(id).value = params.get(id);
+      });
     }
   </script>
 </body>
