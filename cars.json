@@ -1,0 +1,74 @@
+[
+  {
+    "make": "Ford",
+    "model": "F-150",
+    "year": "2019",
+    "price": "$29,995",
+    "dealer": "Madison Ford - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.madisonfordin.com/used-vehicles/ford-f150-2019"
+  },
+  {
+    "make": "Ford",
+    "model": "Escape",
+    "year": "2020",
+    "price": "$23,000",
+    "dealer": "Madison Ford - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.madisonfordin.com/used-vehicles/ford-escape-2020"
+  },
+  {
+    "make": "Toyota",
+    "model": "Camry",
+    "year": "2018",
+    "price": "$18,500",
+    "dealer": "Toyota of Madison - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.toyotaofmadison.net/used-cars-madison-indiana.html#camry"
+  },
+  {
+    "make": "Toyota",
+    "model": "RAV4",
+    "year": "2021",
+    "price": "$27,300",
+    "dealer": "Toyota of Madison - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.toyotaofmadison.net/used-cars-madison-indiana.html#rav4"
+  },
+  {
+    "make": "Jeep",
+    "model": "Grand Cherokee",
+    "year": "2020",
+    "price": "$32,000",
+    "dealer": "Madison CDJR - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.madisoncdjr.com/used-vehicles/#jeep-grand-cherokee"
+  },
+  {
+    "make": "Ram",
+    "model": "1500",
+    "year": "2019",
+    "price": "$28,500",
+    "dealer": "Madison CDJR - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.madisoncdjr.com/used-vehicles/#ram-1500"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Equinox",
+    "year": "2017",
+    "price": "$15,900",
+    "dealer": "Chandler Select - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.chandlerselect.com/newandusedcars#equinox"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Tucson",
+    "year": "2022",
+    "price": "$24,800",
+    "dealer": "Chandler Select - Madison, IN",
+    "image": "https://via.placeholder.com/100",
+    "link": "https://www.chandlerselect.com/newandusedcars#tucson"
+  }
+]
