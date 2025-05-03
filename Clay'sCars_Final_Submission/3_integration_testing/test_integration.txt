@@ -1,0 +1,3 @@
+Integration test stub:
+- Verify UI controls load and dropdowns function as expected.
+- Confirm that filters and view toggles work in sequence.
